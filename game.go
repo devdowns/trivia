@@ -25,14 +25,16 @@ func playGame(names []string, questions types.Questions) string {
 		
 		clearScreen()
 		
+		fmt.Printf("ScoreBoard: %s\n", playersMap.GetScoreBoard())
 		fmt.Printf("Player %s draws a card\n", playerTurn.PlayerName)
-		fmt.Printf("Question #%d \n%s\n", playerTurn.TurnNumber, question.Text)
+		fmt.Printf("Question #%d :%s\n", playerTurn.TurnNumber, question.Text)
 		for _, currentPlayerName := range names {
 			ok := false
 			answer := ""
 			
 			// repeats until you pick a valid player alias to nominate
 			for !ok {
+				fmt.Printf("Votes: %s\n", playersMap.GetVotes())
 				currentPlayerAlias := playersMap[currentPlayerName[0:2]].Alias
 				fmt.Printf("You're up %s, what's your answer %s?\n",
 					playersMap[currentPlayerAlias].Name,
@@ -65,9 +67,9 @@ func playGame(names []string, questions types.Questions) string {
 	gameWinners = playersMap.FindGameWinners()
 	
 	winningMsg.WriteString(fmt.Sprintf(
-		"Congratulations %s you won!!!\n\nPlayer Stats\n%s",
+		"Congratulations %s you won!!!\n\nScoreboard: %s",
 		gameWinners,
-		playersMap.PrintStats()))
+		playersMap.GetScoreBoard()))
 	
 	return winningMsg.String()
 }

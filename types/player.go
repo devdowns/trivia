@@ -137,10 +137,42 @@ func (p *Player) UpdateScores(voteWinners map[string]bool, question string) {
 	}
 }
 
-func (p *Player) PrintStats() string {
-	statsSummary := strings.Builder{}
+func (p *Player) GetScoreBoard() string {
+	// Convert the map to a slice of player stats
+	var playerStats []PlayerStats
 	for _, stat := range *p {
-		statsSummary.WriteString(stat.printStats() + "| ")
+		playerStats = append(playerStats, stat)
+	}
+	
+	// Sort the player stats in descending order based on points
+	sort.Slice(playerStats, func(i, j int) bool {
+		return playerStats[i].Points > playerStats[j].Points
+	})
+	
+	// Generate the scoreboard
+	statsSummary := strings.Builder{}
+	for _, stat := range playerStats {
+		statsSummary.WriteString(stat.printScore() + "| ")
+	}
+	return statsSummary.String()
+}
+
+func (p *Player) GetVotes() string {
+	// Convert the map to a slice of player stats
+	var playerStats []PlayerStats
+	for _, stat := range *p {
+		playerStats = append(playerStats, stat)
+	}
+	
+	// Sort the player stats in descending order based on points
+	sort.Slice(playerStats, func(i, j int) bool {
+		return playerStats[i].Votes > playerStats[j].Votes
+	})
+	
+	// Generate the scoreboard
+	statsSummary := strings.Builder{}
+	for _, stat := range playerStats {
+		statsSummary.WriteString(stat.printVotes() + "| ")
 	}
 	return statsSummary.String()
 }
