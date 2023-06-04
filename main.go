@@ -16,16 +16,16 @@ func main() {
 		names           []string
 		questions       types.Questions
 	)
-	
+
 	const filename = "questions.txt"
-	
+
 	questions, err := types.LoadQuestionsFromFile(filename)
-	
+
 	if err != nil {
 		fmt.Printf("Error reading file %s\n", filename)
 		os.Exit(1)
 	}
-	
+
 	// get number of players for the game
 	for numberOfPlayers < 2 {
 		numberOfPlayers, err = inputNumberOfPlayers()
@@ -34,7 +34,7 @@ func main() {
 			numberOfPlayers = 0
 		}
 	}
-	
+
 	// register player data
 	for i := 0; i < numberOfPlayers; i++ {
 		name, err := readNameFromInput(i + 1)
@@ -42,10 +42,16 @@ func main() {
 			log.Fatal(err)
 		}
 		names = append(names, name)
+		fmt.Printf("Welcome in %s!\n", name)
 	}
-	
+
+	fmt.Printf("Loaded %d questions\n", len(questions))
+
+	fmt.Println("Press Enter to Start...")
+	fmt.Scanln() // Wait for the user to press Enter
+
 	fmt.Println(playGame(names, questions))
-	
+
 }
 
 func readNameFromInput(index int) (string, error) {
@@ -55,11 +61,11 @@ func readNameFromInput(index int) (string, error) {
 	if len(name) < 2 {
 		return name, errors.New("minimum length is 2")
 	}
-	
+
 	return name, nil
 }
 
-func readAliasAnswer() string {
+func getAnswer() string {
 	var answer string
 	fmt.Scanln(&answer)
 	return answer
@@ -67,14 +73,14 @@ func readAliasAnswer() string {
 
 func inputNumberOfPlayers() (int, error) {
 	var numberOfPlayers int
-	
+
 	fmt.Print("Enter the number of players: ")
 	_, err := fmt.Scanln(&numberOfPlayers)
-	
+
 	if numberOfPlayers < 2 {
 		err = errors.New("minimum players required 2")
 	}
-	
+
 	return numberOfPlayers, err
 }
 
