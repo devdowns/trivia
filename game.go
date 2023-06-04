@@ -14,15 +14,15 @@ func playGame(names []string, questions types.Questions) string {
 		winningMsg  strings.Builder
 	)
 	
+	// setup
 	playersMap = types.RegisterPlayers(names)
 	
 	types.ConfigurePlayerChoices()
 	
 	playerTurn = types.AssignPlayerTurns(names)
 	
-	types.ShuffleQuestions(questions)
-	
 	for _, question := range questions {
+		
 		clearScreen()
 		
 		fmt.Printf("Player %s draws a card\n", playerTurn.PlayerName)
@@ -47,9 +47,7 @@ func playGame(names []string, questions types.Questions) string {
 			}
 			
 			// update player stats
-			data := playersMap[answer]
-			data.Votes++
-			playersMap[answer] = data
+			playersMap.UpdatePlayerPoints(answer)
 			
 		}
 		

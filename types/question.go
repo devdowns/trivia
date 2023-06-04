@@ -39,10 +39,12 @@ func LoadQuestionsFromFile(filename string) (Questions, error) {
 		}
 	}
 	
+	shuffleQuestions(questions)
+	
 	return questions, nil
 }
 
-func ShuffleQuestions(questions Questions) {
+func shuffleQuestions(questions Questions) {
 	rand.Shuffle(len(questions), func(i, j int) {
 		questions[i], questions[j] = questions[j], questions[i]
 	})

@@ -8,30 +8,8 @@ import (
 
 type Player map[string]PlayerStats
 
-type PlayerStats struct {
-	Name      string
-	Points    int
-	Questions []string
-	Votes     int
-	Alias     string
-	Choices   string
-}
-
 var playersMap Player
 var playerAliases []string
-
-func (p *PlayerStats) PrintStats() string {
-	var stats strings.Builder
-	
-	stats.WriteString(fmt.Sprintf("%s -> ", p.Name))
-	stats.WriteString(fmt.Sprintf("%d pts ", p.Points))
-	
-	for _, question := range p.Questions {
-		stats.WriteString(question + "\n")
-	}
-	
-	return stats.String()
-}
 
 /*
 	Create custom choices for player, these include all other player alias
@@ -161,8 +139,8 @@ func (p *Player) UpdateScores(voteWinners map[string]bool, question string) {
 
 func (p *Player) PrintStats() string {
 	statsSummary := strings.Builder{}
-	for _, val := range *p {
-		statsSummary.WriteString(val.PrintStats() + "| ")
+	for _, stat := range *p {
+		statsSummary.WriteString(stat.printStats() + "| ")
 	}
 	return statsSummary.String()
 }
@@ -181,4 +159,10 @@ func getPlayerChoices(aliases []string, currentPlayerAlias string) string {
 	
 	// Join the filtered aliases with commas and return the result
 	return strings.Join(filteredAliases, ", ")
+}
+
+func (p *Player) UpdatePlayerPoints(playerName string) {
+	data := (*p)[playerName]
+	data.Votes++
+	(*p)[playerName] = data
 }
