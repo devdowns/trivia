@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -14,7 +14,11 @@ type PlayerStats struct {
 	Questions []string
 	Votes     int
 	Alias     string
+	Choices   string
 }
+
+var playersMap Player
+var playerAliases []string
 
 func (p *PlayerStats) PrintStats() string {
 	var stats strings.Builder
@@ -29,7 +33,37 @@ func (p *PlayerStats) PrintStats() string {
 	return stats.String()
 }
 
-func (p *Player) FindWinners(isReverseQuestion bool) map[string]bool {
+/*
+	Create custom choices for player, these include all other player alias
+	but their own
+*/
+func ConfigurePlayerChoices() {
+	for key := range playersMap {
+		data := playersMap[key]
+		data.Choices = fmt.Sprintf("( %s )", getPlayerChoices(playerAliases, data.Alias))
+		playersMap[key] = data
+	}
+	fmt.Println(playersMap)
+}
+
+func RegisterPlayers(names []string) Player {
+	playersMap = make(Player)
+	for _, name := range names {
+		alias := name[:2]
+		
+		playersMap[alias] = PlayerStats{
+			Name:      name,
+			Points:    0,
+			Questions: nil,
+			Votes:     0,
+			Alias:     alias,
+		}
+		playerAliases = append(playerAliases, alias)
+	}
+	return playersMap
+}
+
+func (p *Player) FindRoundWinners(isReverseQuestion bool) map[string]bool {
 	if isReverseQuestion {
 		return p.findWinnersByVotesReverse()
 	} else {
@@ -87,7 +121,7 @@ func (p *Player) findWinnersByVotesReverse() map[string]bool {
 	return winners
 }
 
-func (p *Player) findWinnersByPoints() string {
+func (p *Player) FindGameWinners() string {
 	var playerStats []PlayerStats
 	var winners []string
 	
@@ -112,7 +146,7 @@ func (p *Player) findWinnersByPoints() string {
 	return strings.Join(winners, ", ")
 }
 
-func (p *Player) updateScores(voteWinners map[string]bool, question string) {
+func (p *Player) UpdateScores(voteWinners map[string]bool, question string) {
 	for player, data := range *p {
 		// Check if player exists in the winner's map. If so, update their points.
 		if _, ok := voteWinners[player]; ok {
@@ -123,28 +157,6 @@ func (p *Player) updateScores(voteWinners map[string]bool, question string) {
 		data.Votes = 0
 		(*p)[player] = data
 	}
-}
-
-func (p *Player) getAliasesSlice() []string {
-	// Get the keys of the Player map
-	keys := make([]string, 0, len(*p))
-	for key := range *p {
-		keys = append(keys, key[0:2])
-	}
-	
-	// Join the keys into a single string
-	return keys
-}
-
-func (p *Player) getNamesSlice() []string {
-	// Get the keys of the Player map
-	keys := make([]string, 0, len(*p))
-	for _, val := range *p {
-		keys = append(keys, val.Name)
-	}
-	
-	// Join the keys into a single string
-	return keys
 }
 
 func (p *Player) PrintStats() string {

@@ -1,21 +1,25 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/devdowns/trivia/types"
 	"log"
 	"os"
+	"os/exec"
+	"runtime"
 )
 
 func main() {
 	var (
 		numberOfPlayers int
 		names           []string
-		questions       []Question
+		questions       types.Questions
 	)
 	
 	const filename = "questions.txt"
 	
-	questions, err := loadQuestionsFromFile(filename)
+	questions, err := types.LoadQuestionsFromFile(filename)
 	
 	if err != nil {
 		fmt.Printf("Error reading file %s\n", filename)
@@ -40,6 +44,51 @@ func main() {
 		names = append(names, name)
 	}
 	
-	fmt.Println(playGame(numberOfPlayers, names, questions))
+	fmt.Println(playGame(names, questions))
 	
+}
+
+func readNameFromInput(index int) (string, error) {
+	fmt.Printf("Enter the name for player #%d: ", index)
+	var name string
+	fmt.Scanln(&name)
+	if len(name) < 2 {
+		return name, errors.New("minimum length is 2")
+	}
+	
+	return name, nil
+}
+
+func readAliasAnswer() string {
+	var answer string
+	fmt.Scanln(&answer)
+	return answer
+}
+
+func inputNumberOfPlayers() (int, error) {
+	var numberOfPlayers int
+	
+	fmt.Print("Enter the number of players: ")
+	_, err := fmt.Scanln(&numberOfPlayers)
+	
+	if numberOfPlayers < 2 {
+		err = errors.New("minimum players required 2")
+	}
+	
+	return numberOfPlayers, err
+}
+
+func clearScreen() {
+	switch runtime.GOOS {
+	case "linux", "darwin": // Unix-like systems
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	case "windows": // Windows
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	default:
+		fmt.Println("Unsupported platform. Unable to clear console screen.")
+	}
 }

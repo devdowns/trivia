@@ -2,59 +2,41 @@ package main
 
 import (
 	"fmt"
+	"github.com/devdowns/trivia/types"
 	"strings"
 )
 
-func playGame(numberOfPlayers int, names []string, questions []Question) string {
+func playGame(names []string, questions types.Questions) string {
 	var (
-		playersMap  Player
-		winningMsg  strings.Builder
+		playerTurn  *types.Turn
+		playersMap  types.Player
 		gameWinners string
-		players     *Node
+		winningMsg  strings.Builder
 	)
 	
-	playersMap = make(Player)
+	playersMap = types.RegisterPlayers(names)
 	
-	/*
-		Register the players, the key to the players map is the alias,
-		the alias is composed of the first two letters of each names
-		to expedite the speed at which the game is played
-	*/
-	for i := 0; i < numberOfPlayers; i++ {
-		
-		playersMap[names[i][0:2]] =
-			PlayerStats{
-				Name:      names[i],
-				Points:    0,
-				Questions: nil,
-				Votes:     0,
-				Alias:     names[i][0:2]}
-	}
+	types.ConfigurePlayerChoices()
 	
-	players = CreateCyclicalList(playersMap.getNamesSlice())
-	aliasesSlice := playersMap.getAliasesSlice()
+	playerTurn = types.AssignPlayerTurns(names)
 	
-	shuffleQuestions(questions)
+	types.ShuffleQuestions(questions)
 	
-	for i, question := range questions {
+	for _, question := range questions {
 		clearScreen()
-		i += 1
 		
-		fmt.Printf("Player %s draws a card\n", players.Value)
-		fmt.Printf("Question #%d \n%s\n", i, question.Question)
-		for currentPlayer := range playersMap {
+		fmt.Printf("Player %s draws a card\n", playerTurn.PlayerName)
+		fmt.Printf("Question #%d \n%s\n", playerTurn.TurnNumber, question.Text)
+		for _, currentPlayerName := range names {
 			ok := false
 			answer := ""
 			
 			// repeats until you pick a valid player alias to nominate
 			for !ok {
-				currentPlayerAlias := playersMap[currentPlayer].Alias
-				// prints player aliases available for you to nominate from
-				personalizedChoices := getPlayerChoices(aliasesSlice, currentPlayerAlias)
-				//fmt.Printf("Nominate one player using their alias: %s\n", personalizedChoices)
+				currentPlayerAlias := playersMap[currentPlayerName[0:2]].Alias
 				fmt.Printf("You're up %s, what's your answer %s?\n",
-					playersMap[currentPlayer].Name,
-					personalizedChoices)
+					playersMap[currentPlayerAlias].Name,
+					playersMap[currentPlayerAlias].Choices)
 				
 				answer = readAliasAnswer()
 				
@@ -72,23 +54,22 @@ func playGame(numberOfPlayers int, names []string, questions []Question) string 
 		}
 		
 		// determine which strategy should be used to find the winner
-		voteWinners := playersMap.FindWinners(question.IsReverse)
+		voteWinners := playersMap.FindRoundWinners(question.IsReverse)
 		
 		// update player scores after each question
-		playersMap.updateScores(voteWinners, question.Question)
+		playersMap.UpdateScores(voteWinners, question.Text)
 		
-		players = players.Next
+		playerTurn.Next()
 	}
 	
 	clearScreen()
 	
-	gameWinners = playersMap.findWinnersByPoints()
+	gameWinners = playersMap.FindGameWinners()
 	
-	winningMsg.WriteString(fmt.Sprintf("Congratulations %s you won!!!\n\n", gameWinners))
-	
-	winningMsg.WriteString("Player Stats\n")
-	
-	winningMsg.WriteString(playersMap.PrintStats())
+	winningMsg.WriteString(fmt.Sprintf(
+		"Congratulations %s you won!!!\n\nPlayer Stats\n%s",
+		gameWinners,
+		playersMap.PrintStats()))
 	
 	return winningMsg.String()
 }

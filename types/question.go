@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"math/rand"
@@ -7,19 +7,20 @@ import (
 )
 
 type Question struct {
-	Question  string
+	Text      string
 	IsReverse bool
 }
 
-func loadQuestionsFromFile(filename string) ([]Question, error) {
+type Questions []Question
+
+func LoadQuestionsFromFile(filename string) (Questions, error) {
 	fileContent, err := os.ReadFile(filename)
-	
 	if err != nil {
 		return nil, err
 	}
 	
 	lines := strings.Split(string(fileContent), "\n")
-	var questions []Question
+	questions := make(Questions, 0)
 	
 	for _, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
@@ -31,7 +32,7 @@ func loadQuestionsFromFile(filename string) ([]Question, error) {
 			}
 			
 			question := Question{
-				Question:  trimmedLine,
+				Text:      trimmedLine,
 				IsReverse: isReverse,
 			}
 			questions = append(questions, question)
@@ -41,7 +42,7 @@ func loadQuestionsFromFile(filename string) ([]Question, error) {
 	return questions, nil
 }
 
-func shuffleQuestions(questions []Question) {
+func ShuffleQuestions(questions Questions) {
 	rand.Shuffle(len(questions), func(i, j int) {
 		questions[i], questions[j] = questions[j], questions[i]
 	})
