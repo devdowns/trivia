@@ -59,7 +59,7 @@ func playGame(names []string, questions types.Questions) string {
 		// update player scores after each question
 		playersMap.UpdateScores(voteWinners, question.Text)
 
-		playerTurn.Next()
+		playerTurn = playerTurn.Next()
 	}
 
 	clearScreen()
